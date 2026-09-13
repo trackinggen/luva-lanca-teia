@@ -1,0 +1,69 @@
+/* TikTok Shop style buttons — shared across all funnel pages */
+:root{ --ttk-red:#fe2c55; --ttk-red-dark:#e0224a; --ttk-soft:#fff1f4; }
+
+/* Primary CTA */
+.cta,
+.copy,
+.tt-btn,
+#lv-pix-generate,
+#lv-copy-pix,
+#lv-color-cta,
+a[href="/pagamento"].ttk-buy,
+a[href="/potehermetico-pagamento"].ttk-buy{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  width:100% !important;
+  min-height:48px !important;
+  padding:0 18px !important;
+  border:0 !important;
+  border-radius:999px !important;
+  background:var(--ttk-red) !important;
+  background-image:none !important;
+  color:#fff !important;
+  font-weight:700 !important;
+  font-size:15px !important;
+  letter-spacing:.01em !important;
+  line-height:1.15 !important;
+  box-shadow:none !important;
+  cursor:pointer;
+  transition:background .15s ease, transform .06s ease, opacity .15s ease;
+}
+.cta:hover,.copy:hover,.tt-btn:hover,#lv-pix-generate:hover,#lv-copy-pix:hover,#lv-color-cta:hover:not([disabled]){background:var(--ttk-red-dark) !important}
+.cta:active,.copy:active,.tt-btn:active,#lv-pix-generate:active,#lv-copy-pix:active,#lv-color-cta:active{transform:scale(.985) !important}
+#lv-color-cta[disabled]{background:#d5d6d9 !important;cursor:not-allowed}
+
+/* Secondary (outline pink) */
+.ttk-btn-secondary,
+a[href="/pagamento"].ttk-secondary,
+a[href="/potehermetico-pagamento"].ttk-secondary{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:48px !important;
+  border-radius:999px !important;
+  background:var(--ttk-soft) !important;
+  color:var(--ttk-red) !important;
+  border:1px solid rgba(254,44,85,.35) !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+}
+.ttk-btn-secondary:active,a.ttk-secondary:active{transform:scale(.985)}
+
+/* Tertiary / decline link */
+.decline,
+#lv-pix-qr-toggle{
+  border-radius:999px !important;
+  font-weight:600 !important;
+}
+
+/* JS toggles these buttons with inline display:none — o estado oculto deve vencer */
+#lv-pix-generate[style*="display: none"],
+#lv-pix-generate[style*="display:none"],
+#lv-copy-pix[style*="display: none"],
+#lv-copy-pix[style*="display:none"],
+#lv-pix-qr-toggle[style*="display: none"],
+#lv-pix-qr-toggle[style*="display:none"]{
+  display:none !important;
+}
