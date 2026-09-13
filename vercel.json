@@ -1,0 +1,76 @@
+{
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "trailingSlash": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/site/site.html"
+    },
+    {
+      "source": "/site",
+      "destination": "/site/site.html"
+    },
+    {
+      "source": "/site/",
+      "destination": "/site/site.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/checkout/pagamento.html"
+    },
+    {
+      "source": "/checkout/",
+      "destination": "/checkout/pagamento.html"
+    },
+    {
+      "source": "/pagamento",
+      "destination": "/checkout/pagamento.html"
+    },
+    {
+      "source": "/pagamento/",
+      "destination": "/checkout/pagamento.html"
+    },
+    {
+      "source": "/obrigado",
+      "destination": "/obrigado/obrigado.html"
+    },
+    {
+      "source": "/obrigado/",
+      "destination": "/obrigado/obrigado.html"
+    },
+    {
+      "source": "/upsell1",
+      "destination": "/upsell1/upsell1.html"
+    },
+    {
+      "source": "/upsell1/",
+      "destination": "/upsell1/upsell1.html"
+    },
+    {
+      "source": "/upsell2",
+      "destination": "/upsell2/upsell2.html"
+    },
+    {
+      "source": "/upsell2/",
+      "destination": "/upsell2/upsell2.html"
+    },
+    {
+      "source": "/upsell3",
+      "destination": "/upsell3/upsell3.html"
+    },
+    {
+      "source": "/upsell3/",
+      "destination": "/upsell3/upsell3.html"
+    },
+    {
+      "source": "/upsell4",
+      "destination": "/upsell4/upsell4.html"
+    },
+    {
+      "source": "/upsell4/",
+      "destination": "/upsell4/upsell4.html"
+    }
+  ]
+}
