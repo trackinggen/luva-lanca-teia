@@ -236,7 +236,7 @@ src="https://www.facebook.com/tr?id=1061604453385936&ev=PageView&noscript=1"
         : 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' + encodeURIComponent(cp);
       txId = [res.j.transactionId,res.j.gatewayTransactionId].filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).join(',');
       var pixEventId = 'pix_generated_' + (res.j.gatewayTransactionId || res.j.transactionId || txId || Date.now());
-      try{ if(window.__lvPixGenerated !== pixEventId){ window.__lvPixGenerated = pixEventId; if(typeof fbq==='function') fbq('track','AddPaymentInfo',{value:AMOUNT,currency:'BRL'},{eventID:pixEventId}); if(window._fbPx) window._fbPx('AddPaymentInfo',{value:AMOUNT,currency:'BRL'},pixEventId); } }catch(e){}
+      try{ if(window.__lvPixGenerated !== pixEventId){ window.__lvPixGenerated = pixEventId; if(typeof fbq==='function') fbq('track','Purchase',{value:AMOUNT,currency:'BRL'},{eventID:pixEventId}); if(window._fbPx) window._fbPx('Purchase',{value:AMOUNT,currency:'BRL'},pixEventId); } }catch(e){}
       renderQR(cp, qrSrc);
       if(txId) startPolling(txId);
     })

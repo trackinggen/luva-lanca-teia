@@ -763,7 +763,7 @@
         try{ localStorage.setItem('lastPixTx', ids||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/upsell1'); localStorage.setItem('lastPixOrder', res.j.orderId||res.j.gatewayTransactionId||''); }catch(e){}
         try{ localStorage.setItem('lv_pix_cache', JSON.stringify({ids:ids||'',cp:cp,qr:res.j.qrCode||'',ts:Date.now()})); }catch(e){}
         var pixEventId='pix_generated_'+(res.j.orderId||res.j.gatewayTransactionId||ids||Date.now());
-        try{ if(window.__lvPixGenerated!==pixEventId){ window.__lvPixGenerated=pixEventId; if(typeof fbq==='function') fbq('track','AddPaymentInfo',{value:amount,currency:'BRL'},{eventID:pixEventId}); if(window._fbPx) window._fbPx('AddPaymentInfo',{value:amount,currency:'BRL'},pixEventId); } }catch(e){}
+        try{ if(window.__lvPixGenerated!==pixEventId){ window.__lvPixGenerated=pixEventId; if(typeof fbq==='function') fbq('track','Purchase',{value:amount,currency:'BRL'},{eventID:pixEventId}); if(window._fbPx) window._fbPx('Purchase',{value:amount,currency:'BRL'},pixEventId); } }catch(e){}
         if(ids) startPolling(ids);
       })
       .catch(function(){ fail('Erro de conexão. Tente novamente.'); });
