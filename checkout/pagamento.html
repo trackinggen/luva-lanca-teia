@@ -1144,7 +1144,7 @@
 }catch(e){}})();
 </script><script src="/checkout/js/utm.js"></script><script src="/checkout/js/support-widget.js" defer></script><script>(function(){var M=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];function f(d){return d.getDate()}
 var RANGES={"PAC - FRETE GRÁTIS":[5,5],"PAC":[5,5],"Frete Grátis":[5,5],"JADLOG":[2,3],"SEDEX 12":[1,2]};
-window.__lvSetEta=function(name){var r=RANGES[name]||RANGES["Frete Grátis"];var n=new Date(),a=new Date(n.getTime()+r[0]*864e5),b=new Date(n.getTime()+r[1]*864e5);var t=a.getMonth()===b.getMonth()?f(a)+" e "+f(b)+" de "+M[b.getMonth()]:f(a)+" de "+M[a.getMonth()]+" e "+f(b)+" de "+M[b.getMonth()];document.querySelectorAll("[data-eta]").forEach(function(e){if(e.textContent!==t)e.textContent=t});};
+window.__lvSetEta=function(name){var r=RANGES[name]||RANGES["Frete Grátis"];var n=new Date(),a=new Date(n.getTime()+r[0]*864e5),b=new Date(n.getTime()+r[1]*864e5);var t=a.getTime()===b.getTime()?"no dia "+f(a)+" de "+M[a.getMonth()]:(a.getMonth()===b.getMonth()?f(a)+" e "+f(b)+" de "+M[b.getMonth()]:f(a)+" de "+M[a.getMonth()]+" e "+f(b)+" de "+M[b.getMonth()]);document.querySelectorAll("[data-eta]").forEach(function(e){if(e.textContent!==t)e.textContent=t});};
 window.__lvSetEta("Frete Grátis");})();</script><script>(function(){try{
 var cor='';
 var img=localStorage.getItem('corImagem')||'/site/images/luva/produto-1.webp';
