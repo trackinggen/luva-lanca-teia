@@ -7,7 +7,7 @@
   var KEY = "lv_utm";
   var USER_KEY = "dadosPessoais";
   var EXT_KEY = "lv_external_id";
-  var PIXEL_IDS = window.__LV_PIXEL_IDS || ["2853380391727273","932784733217695","1615523853321696","1115105571185956"];
+  var PIXEL_IDS = window.__LV_PIXEL_IDS || ["1096982006197307"];
   var FIELDS = [
     "utm_source",
     "utm_medium",
@@ -165,11 +165,6 @@
       var sig = JSON.stringify(ud);
       if (sig === lastMatch) return ud;
       lastMatch = sig;
-      if (typeof window.fbq === "function" && (ud.em || ud.ph)) {
-        PIXEL_IDS.forEach(function (id) {
-          window.fbq("init", id, ud);
-        });
-      }
       return ud;
     } catch (e) {
       return {};
@@ -213,45 +208,8 @@
     };
   };
 
-  /**
-   * Dispara o Purchase do Pixel apenas uma vez por pedido, usando o mesmo
-   * orderId enviado à UTMify/CAPI como eventID (deduplicação pixel × servidor).
-   */
-  window.lvTrackPurchase = function (orderId, amount) {
-    if (!orderId) return false;
-    var eventId = "pix_" + orderId;
-    try {
-      if (localStorage.getItem("fbPurchase_" + eventId)) return false;
-      localStorage.setItem("fbPurchase_" + eventId, "1");
-    } catch (e) {}
-    var value = Number(amount) || 0;
-    window.lvAdvancedMatch();
-    try {
-      if (typeof window.fbq === "function") {
-        window.fbq(
-          "track",
-          "Purchase",
-          { value: value, currency: "BRL", content_type: "product" },
-          { eventID: eventId },
-        );
-      }
-    } catch (e) {}
-    try {
-      PIXEL_IDS.forEach(function (id) {
-        var img = new Image();
-        img.src =
-          "https://www.facebook.com/tr/?id=" +
-          id +
-          "&ev=Purchase&cd[value]=" +
-          value +
-          "&cd[currency]=BRL&eid=" +
-          encodeURIComponent(eventId) +
-          "&noscript=1&rl=" +
-          Date.now();
-      });
-    } catch (e) {}
-    return true;
-  };
+  // A UTMify recebe os eventos de pagamento pela IronPay.
+  window.lvTrackPurchase = function () { return false; };
 })();
 
 /* --------------------------------------------------------------------------
