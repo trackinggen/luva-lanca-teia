@@ -27,6 +27,7 @@
     path = path.replace(/\.html$/, "").replace(/\/$/, "") || "/";
     if (path === next) return;
 
+    function trackingQuery(){try{var state=localStorage.getItem('lastPixTrackingState')||'',status=localStorage.getItem('lastPixTrackedStatus')||'';return state?'&state='+encodeURIComponent(state)+'&tracked='+encodeURIComponent(status):'';}catch(e){return '';}}
     var done = false;
     function goNext() {
       if (done) return;
@@ -50,9 +51,10 @@
 
     function check() {
       if (done) return;
-      fetch("/api/public/pix/status/?id=" + encodeURIComponent(txId), { cache: "no-store" })
+      fetch("/api/public/pix/status/?id=" + encodeURIComponent(txId)+trackingQuery(), { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (j) {
+          try{if(j&&j.trackingStatus)localStorage.setItem("lastPixTrackedStatus",j.trackingStatus);}catch(e){}
           if (j && j.status === "paid") goNext();
         })
         .catch(function () {});

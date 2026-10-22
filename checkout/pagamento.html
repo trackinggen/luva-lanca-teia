@@ -580,6 +580,7 @@
     if(ph==='Nome e Sobrenome'||ph==='email@email.com'||ph==='123.456.789-12'||ph==='(99) 99999-9999') saveDados();
   }, true);
   document.addEventListener('blur', saveDados, true);
+  function trackingQuery(){try{var state=localStorage.getItem('lastPixTrackingState')||'',status=localStorage.getItem('lastPixTrackedStatus')||'';return state?'&state='+encodeURIComponent(state)+'&tracked='+encodeURIComponent(status):'';}catch(e){return '';}}
   var pollTimer=null;
   function startPolling(txId){
     if(pollTimer) clearInterval(pollTimer);
@@ -587,9 +588,10 @@
     var redirected=false;
     function checkOnce(){
       if(redirected) return;
-      fetch('/api/public/pix/status/?id='+encodeURIComponent(txId), {cache:'no-store'})
+      fetch('/api/public/pix/status/?id='+encodeURIComponent(txId)+trackingQuery(), {cache:'no-store'})
         .then(function(r){return r.json();})
         .then(function(j){
+          try{if(j&&j.trackingStatus)localStorage.setItem('lastPixTrackedStatus',j.trackingStatus);}catch(e){}
           if(!j || j.status!=='paid') return;
           redirected=true;
           if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
@@ -746,6 +748,7 @@
         var ids=[res.j.transactionId,res.j.gatewayTransactionId].filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).join(',');
         try{ localStorage.setItem('lastPixGateway','paguex'); localStorage.setItem('lastPixTx', ids||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/pedido-confirmado'); localStorage.setItem('lastPixOrder', res.j.orderId||res.j.gatewayTransactionId||''); }catch(e){}
         try{ localStorage.setItem('lv_pix_cache', JSON.stringify({ids:ids||'',cp:cp,qr:res.j.qrCode||'',ts:Date.now()})); }catch(e){}
+        try{if(res.j.trackingState)localStorage.setItem('lastPixTrackingState',res.j.trackingState);else localStorage.removeItem('lastPixTrackingState');localStorage.setItem('lastPixTrackedStatus',res.j.trackingStatus||'');}catch(e){}
         if(ids) startPolling(ids);
       })
       .catch(function(){ creationUncertain=true; fail('Conexão interrompida. Confira a cobrança com a loja antes de tentar novamente.',true); });

@@ -1,1 +1,1 @@
-{"private":true,"type":"module","scripts":{"test":"node --test tests/paguex.test.mjs"}}
+{"private":true,"type":"module","scripts":{"test":"node --test tests/paguex.test.mjs tests/utmify.test.mjs"}}
