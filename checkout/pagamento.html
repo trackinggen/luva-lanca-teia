@@ -587,7 +587,7 @@
     var redirected=false;
     function checkOnce(){
       if(redirected) return;
-      fetch('/api/public/pix/status?id='+encodeURIComponent(txId), {cache:'no-store'})
+      fetch('/api/public/pix/status/?id='+encodeURIComponent(txId), {cache:'no-store'})
         .then(function(r){return r.json();})
         .then(function(j){
           if(!j || j.status!=='paid') return;
@@ -713,7 +713,7 @@
       if(loadEl){ loadEl.innerHTML='<p class="text-[13px] font-semibold text-rose-600">'+(noRetry?msg:'Falha ao gerar QR Code')+'</p><p class="text-[11px] text-neutral-500 mt-1">Toque para tentar novamente</p>'; loadEl.style.cursor='pointer'; loadEl.onclick=function(){ loading=false; loadEl.onclick=null; createPix(0); }; }
       loading=false;
     }
-    fetch('/api/public/pix/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    fetch('/api/public/pix/create/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){ return r.json().catch(function(){return null;}).then(function(j){ return {ok:r.ok,j:j}; }); })
       .then(function(res){
         var codeEl=document.getElementById('lv-pix-code');

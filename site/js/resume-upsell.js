@@ -50,7 +50,7 @@
 
     function check() {
       if (done) return;
-      fetch("/api/public/pix/status?id=" + encodeURIComponent(txId), { cache: "no-store" })
+      fetch("/api/public/pix/status/?id=" + encodeURIComponent(txId), { cache: "no-store" })
         .then(function (r) { return r.json(); })
         .then(function (j) {
           if (j && j.status === "paid") goNext();

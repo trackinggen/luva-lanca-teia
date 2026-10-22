@@ -6,7 +6,7 @@ Documentação: https://app.pague-x.com.br/docs
 
 Configure PAGUEX_SECRET_KEY e PAGUEX_WEBHOOK_SECRET como secrets de produção na Vercel e publique novamente. A Public Key não é necessária no Pix processado pelo backend.
 
-Webhook: https://luva-lanca-teia.vercel.app/api/public/pix/webhook
+Webhook: https://luva-lanca-teia.vercel.app/api/public/pix/webhook/
 
 O backend envia postbackUrl por cobrança. De acordo com a documentação, isso dispensa webhook fixo no painel. Se usar o painel, deixe os eventos desmarcados para receber todos.
 
