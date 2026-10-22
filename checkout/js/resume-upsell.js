@@ -19,8 +19,8 @@
     var stamp = parseInt(localStorage.getItem("lastPixTxAt") || "0", 10) || 0;
     if (stamp && Date.now() - stamp > 6 * 60 * 60 * 1000) return;
 
-    var next = localStorage.getItem("lvPixNext") || "/upsell1";
-    if (!/^\/[A-Za-z0-9/_-]*$/.test(next)) next = "/upsell1";
+    var next = "/pedido-confirmado";
+    if (!/^\/[A-Za-z0-9/_-]*$/.test(next)) next = "/pedido-confirmado";
 
     // Evita loop caso o usuário já esteja na etapa de destino.
     var path = (window.top && window.top.location ? window.top.location.pathname : location.pathname) || "";
@@ -31,8 +31,7 @@
     function goNext() {
       if (done) return;
       done = true;
-      // O Purchase já é disparado pelo servidor (CAPI) na confirmação do
-      // webhook; aqui só recuperamos a navegação.
+      // Este script apenas recupera a navegação após confirmar o status no gateway.
       try {
         localStorage.setItem("pixPaid_" + txId, "1");
         localStorage.removeItem("lv_pix_cache");

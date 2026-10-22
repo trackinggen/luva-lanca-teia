@@ -522,7 +522,9 @@
 
 <script>
 (function(){
-  var loaded=false, loading=false;
+  var loaded=false, loading=false, creationUncertain=false;
+  // Cached IronPay charges cannot be resumed through the Pague-X API.
+  try{if(localStorage.getItem('lastPixGateway')!=='paguex'){localStorage.removeItem('lastPixTx');localStorage.removeItem('lv_pix_cache');}}catch(e){}
   function setLoading(){
     var code=document.getElementById('lv-pix-code');
     var qr=document.getElementById('lv-pix-qr');
@@ -581,7 +583,7 @@
   var pollTimer=null;
   function startPolling(txId){
     if(pollTimer) clearInterval(pollTimer);
-    try{ localStorage.setItem('lastPixTx', txId||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/upsell1'); }catch(e){}
+    try{ localStorage.setItem('lastPixTx', txId||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/pedido-confirmado'); }catch(e){}
     var redirected=false;
     function checkOnce(){
       if(redirected) return;
@@ -599,8 +601,8 @@
           try{ localStorage.setItem('pixPaid_'+txId,'1'); localStorage.removeItem('lv_pix_cache'); }catch(e){}
           // Analytics: funnel step — confirm redirect to upsell2
           try{
-            var _payload={txId:txId,status:'paid',amount:_amt,to:'/upsell1',ts:Date.now()};
-            if(window.dataLayer) window.dataLayer.push({event:'upsell_redirect',pix_tx_id:txId,pix_status:'paid',pix_amount:_amt,destination:'/upsell1'});
+            var _payload={txId:txId,status:'paid',amount:_amt,to:'/pedido-confirmado',ts:Date.now()};
+            if(window.dataLayer) window.dataLayer.push({event:'upsell_redirect',pix_tx_id:txId,pix_status:'paid',pix_amount:_amt,destination:'/pedido-confirmado'});
             navigator.sendBeacon && navigator.sendBeacon('/api/public/analytics/upsell-redirect', new Blob([JSON.stringify(_payload)],{type:'application/json'}));
             try{ localStorage.setItem('upsellRedirect_'+txId, JSON.stringify(_payload)); }catch(e){}
             console.log('[funnel] upsell_redirect', _payload);
@@ -612,13 +614,13 @@
             ov.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:inherit;padding:24px;text-align:center';
             ov.innerHTML='<div style="width:72px;height:72px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(16,185,129,.4)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
               +'<div style="font-size:22px;font-weight:800;color:#111">Pagamento aprovado!</div>'
-              +'<div style="font-size:14px;color:#666;max-width:300px">Seu pedido foi confirmado. Preparando uma condição especial para você...</div>'
+              +'<div style="font-size:14px;color:#666;max-width:300px">Seu pedido foi confirmado. Abrindo a confirmação da sua compra...</div>'
               +'<div style="width:36px;height:36px;border:3px solid #e5e5e5;border-top-color:#10b981;border-radius:50%;animation:lvspin 0.8s linear infinite"></div>'
               +'<style>@keyframes lvspin{to{transform:rotate(360deg)}}</style>';
             document.body.appendChild(ov);
           }catch(e){}
           setTimeout(function(){
-            if(window.lvGo){window.lvGo('/upsell1');}else{window.top.location.href='/upsell1';}
+            if(window.lvGo){window.lvGo('/pedido-confirmado');}else{window.top.location.href='/pedido-confirmado';}
           }, 1400);
         })
         .catch(function(){});
@@ -666,20 +668,22 @@
   }catch(e){}
   function createPix(attempt){
     attempt = attempt || 0;
-    if(loaded) return;
+    if(loaded || creationUncertain) return;
     if(attempt===0){ if(loading) return; loading=true; }
     setLoading();
-    var amount=getAmount()||17.99;
+    var order=window.__lvPedido;
+    if(!order){loading=false;return;}
+    var amount=order.total;
     saveDados();
     var _d=loadDados();
     var _v=function(id){var el=document.getElementById(id);return el&&el.value?String(el.value).trim():'';};
     var payload={
       amount: amount,
       client: {
-        name: getVal('Nome e Sobrenome') || _d.nome || 'Cliente',
-        email: getVal('email@email.com') || _d.email || 'cliente@email.com',
-        document: ((getVal('123.456.789-12')||_d.cpf||'00000000000')+'').replace(/\D/g,''),
-        phone: ((getVal('(99) 99999-9999')||_d.telefone||'11999999999')+'').replace(/\D/g,'')
+        name: getVal('Nome e Sobrenome') || _d.nome || '',
+        email: getVal('email@email.com') || _d.email || '',
+        document: ((getVal('123.456.789-12')||_d.cpf||'')+'').replace(/\D/g,''),
+        phone: ((getVal('(99) 99999-9999')||_d.telefone||'')+'').replace(/\D/g,'')
       },
       shipping: {
         cep: _v('lv-cep'),
@@ -690,13 +694,15 @@
         cidade: _v('lv-cidade'),
         uf: _v('lv-uf')
       },
-      products: [{ name: 'Sacola_De_Presentes', quantity: 1, price: amount, variant: (function(){ try{ return new URLSearchParams(location.search).get('cor') || localStorage.getItem('lvLimpamaxColor') || 'Preto'; }catch(e){ return 'Preto'; } })() }],
+      products: [{name:'LUVA_LANCA_TEIA',quantity:order.qty}],
+      shippingMethod:order.shipping.name,
+      bumpIds:order.bumps.map(function(b){return b.id;}),
       utm: (window.getUTMs ? window.getUTMs() : {}),
       fb: (window.getFbData ? window.getFbData() : {}),
       browser: (window.getFbData ? window.getFbData() : {})
     };
     function fail(msg, noRetry){
-      if(!noRetry && attempt < 3){ setTimeout(function(){ createPix(attempt+1); }, 1200*(attempt+1)); return; }
+      // Never blindly repeat a charge-creation request.
       var codeEl=document.getElementById('lv-pix-code');
       var loadEl=document.getElementById('lv-pix-loading');
       if(codeEl){ codeEl.style.display='block'; codeEl.innerText=msg; }
@@ -714,7 +720,8 @@
         var qrEl=document.getElementById('lv-pix-qr');
         if(!res.ok || !res.j || !res.j.copyPaste){
           if(res.j && res.j.code==='invalid_document'){ fail(res.j.error, true); return; }
-          fail('Não foi possível gerar o PIX. Tente novamente.');
+          if(res.j && res.j.code==='payment_creation_uncertain') creationUncertain=true;
+          fail((res.j && res.j.error)||'Não foi possível gerar o PIX. Tente novamente.',true);
           return;
 
         }
@@ -737,11 +744,11 @@
         var qrToggle=document.getElementById('lv-pix-qr-toggle');
         if(qrToggle) qrToggle.style.display='flex';
         var ids=[res.j.transactionId,res.j.gatewayTransactionId].filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).join(',');
-        try{ localStorage.setItem('lastPixTx', ids||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/upsell1'); localStorage.setItem('lastPixOrder', res.j.orderId||res.j.gatewayTransactionId||''); }catch(e){}
+        try{ localStorage.setItem('lastPixGateway','paguex'); localStorage.setItem('lastPixTx', ids||''); localStorage.setItem('lastPixTxAt', String(Date.now())); localStorage.setItem('lvPixNext','/pedido-confirmado'); localStorage.setItem('lastPixOrder', res.j.orderId||res.j.gatewayTransactionId||''); }catch(e){}
         try{ localStorage.setItem('lv_pix_cache', JSON.stringify({ids:ids||'',cp:cp,qr:res.j.qrCode||'',ts:Date.now()})); }catch(e){}
         if(ids) startPolling(ids);
       })
-      .catch(function(){ fail('Erro de conexão. Tente novamente.'); });
+      .catch(function(){ creationUncertain=true; fail('Conexão interrompida. Confira a cobrança com a loja antes de tentar novamente.',true); });
   }
 
   // PIX só é gerado quando o usuário clica no botão "GERAR PIX COPIA E COLA"
