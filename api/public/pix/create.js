@@ -11,6 +11,7 @@ export default async function handler(req,res){
   if(!data.id||!data.pix?.copiaECola||data.amount!==order.amount||data.paymentMethod!=='pix')throw Error('invalid_response');
   return res.status(201).json({copyPaste:data.pix.copiaECola,qrCode:data.pix.qrCodeImageUrl||'',transactionId:data.id,gatewayTransactionId:data.id,orderId:data.id,gateway:'paguex'});
  }catch(error){
+  console.error('paguex_create_failed',{code:error?.code||'invalid_response',status:error?.status||502});
   return res.status(502).json({code:'payment_creation_uncertain',error:'Não foi possível confirmar a geração. Confira a cobrança no painel antes de tentar novamente.'});
  }
 }

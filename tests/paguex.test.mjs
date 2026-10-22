@@ -54,3 +54,28 @@ test('webhook enforces size and JSON validity without performing business side e
 test('disabled credentials fail closed',async()=>{
  const value=process.env.PAGUEX_SECRET_KEY;delete process.env.PAGUEX_SECRET_KEY;try{const r=res();await create({method:'POST',body:body()},r);assert.equal(r.statusCode,503);}finally{process.env.PAGUEX_SECRET_KEY=value;}
 });
+
+test('compact references preserve the complete 256-bit HMAC under 80 characters',()=>{
+ const ref=makeReference(7638),parts=ref.split('.'),signature=parts.pop();assert.ok(ref.length<=80);
+ const expected=createHmac('sha256',process.env.PAGUEX_WEBHOOK_SECRET).update(parts.join('.')).digest();
+ assert.equal(Buffer.from(signature,'base64url').length,32);assert.deepEqual(Buffer.from(signature,'base64url'),expected);
+ assert.equal(validReference(ref,7638),true);assert.equal(validReference(ref,7639),false);
+ const legacyValue='lv1.7638.1792686058615.77e717416f1369fd8c2bcec7';
+ const legacy=legacyValue+'.'+createHmac('sha256',process.env.PAGUEX_WEBHOOK_SECRET).update(legacyValue).digest('hex');
+ assert.equal(validReference(legacy,7638),true);
+ assert.equal(validReference(legacy.slice(0,80)+'_ec096fc6-2ce4-439d-9812-edf0ee1c419f',7638),false);
+});
+test('provider UUID suffix does not remove or bypass any signature bytes',async()=>{
+ await withFetch(async(url,options)=>{const payload=JSON.parse(options.body);return Response.json({data:{id:'charge-123456',reference:payload.reference+'_ec096fc6-2ce4-439d-9812-edf0ee1c419f',amount:'1799',paymentMethod:'PIX',pix:{copiaECola:'000201-test'}}});},async()=>{const r=res();await create({method:'POST',body:body()},r);assert.equal(r.statusCode,201);assert.equal(r.body.copyPaste,'000201-test');});
+});
+test('missing create metadata is fetched from the existing charge, not recreated',async()=>{
+ let posts=0,gets=0,reference;
+ await withFetch(async(url,options)=>{
+  if(options.method==='POST'){posts++;reference=JSON.parse(options.body).reference;return Response.json({id:'charge-123456',pix:{copiaECola:'000201-existing'}});}
+  gets++;assert.match(url,/charges\/charge-123456$/);return Response.json({id:'charge-123456',reference,amount:1799,paymentMethod:'pix'});
+ },async()=>{const r=res();await create({method:'POST',body:body()},r);assert.equal(r.statusCode,201);assert.equal(r.body.copyPaste,'000201-existing');assert.equal(posts,1);assert.equal(gets,1);});
+});
+test('another signed order or truncated signature cannot display a Pix',async()=>{
+ await withFetch(async()=>Response.json({id:'charge-123456',reference:makeReference(1799),amount:1799,paymentMethod:'pix',pix:{copiaECola:'000201-other'}}),async()=>{const r=res();await create({method:'POST',body:body()},r);assert.equal(r.statusCode,502);assert.equal(r.body.copyPaste,undefined);});
+ const ref=makeReference(1799);assert.equal(validReference(ref.slice(0,-1),1799),false);
+});

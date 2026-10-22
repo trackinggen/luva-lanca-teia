@@ -29,3 +29,7 @@ Scripts existentes do navegador são preservados. A integração nativa da IronP
 ## Validação
 
 npm test usa fetch simulado. Nenhuma cobrança real nem evento de compra é criado pelos testes. Após publicar, validar com dados reais autorizados no checkout, conferir cobrança no painel, pagar e confirmar navegação/status e webhook assinado.
+
+### Compatibilidade da referência
+
+O identificador observado no painel tinha a referência original cortada em 80 caracteres e um UUID adicional. A nova referência lv2 cabe nesse limite usando base64url para o HMAC-SHA256 completo (32 bytes/256 bits), sem truncar a assinatura. Referências antigas cortadas continuam sendo rejeitadas. O sufixo UUID é tratado apenas como metadado; o prefixo completo continua autenticado. Respostas dentro de data e valores em centavos como string são normalizados. Se POST retornar somente ID/Pix, o backend consulta os metadados com GET sem recriar a cobrança.
